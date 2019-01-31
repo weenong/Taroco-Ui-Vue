@@ -15,7 +15,7 @@
             <el-button type="default" @click="handleFilter" icon="el-icon-search">搜 索</el-button>
           </el-form-item>
           <el-form-item style="float: right">
-            <el-button v-if="sys_user_add" @click="handleCreate" type="primary" icon="el-icon-plus">新 增</el-button>
+            <el-button @click="handleCreate" type="primary" icon="el-icon-plus">新 增</el-button>
           </el-form-item>
       </el-form>
     </template>
@@ -68,7 +68,7 @@
 
       <el-table-column align="center" label="标签">
         <template slot-scope="scope">
-          <span>{{scope.row.label}}</span>
+          <el-tag type="success">{{scope.row.label}}</el-tag>
         </template>
       </el-table-column>
 
@@ -80,8 +80,8 @@
 
       <el-table-column align="center" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button v-if="sys_user_upd" size="mini" type="primary" @click="handleUpdate(scope.row)" icon="el-icon-edit"></el-button>
-          <el-button v-if="sys_user_del" size="mini" type="danger" @click="deletes(scope.row)" icon="el-icon-delete"></el-button>
+          <el-button size="mini" type="primary" @click="handleUpdate(scope.row)" icon="el-icon-edit"></el-button>
+          <el-button size="mini" type="danger" @click="deletes(scope.row)" icon="el-icon-delete"></el-button>
         </template>
       </el-table-column>
 
@@ -122,7 +122,7 @@
         </el-form-item>
 
         <el-form-item label="角色" prop="role">
-          <el-select  v-model="role" placeholder="请选择" multiple>
+          <el-select v-model="role" placeholder="请选择" multiple @change="onRoleChange()">
             <el-option v-for="item in rolesOptions" :key="item.roleId" :label="item.roleDesc" :value="item.roleId" :disabled="isDisabled[item.delFlag]">
               <span style="float: left">{{ item.roleDesc }}</span>
               <span style="float: right; color: #8492a6; font-size: 13px">{{ item.roleCode }}</span>
@@ -138,7 +138,7 @@
           <el-input v-model="form.label" placeholder="多个标签 ',' 隔开"></el-input>
         </el-form-item>
 
-        <el-form-item label="状态" v-if="dialogStatus == 'update' && sys_user_del " prop="delFlag">
+        <el-form-item label="状态" v-if="dialogStatus == 'update'" prop="delFlag">
           <el-select v-model="form.delFlag" placeholder="请选择">
             <el-option v-for="item in statusOptions" :key="item" :label="item | statusFilter" :value="item"> </el-option>
           </el-select>
@@ -156,7 +156,6 @@
 <script>
 import { fetchList, getObj, addObj, putObj, delObj } from '@/api/user'
 import { deptRoleList, fetchDeptTree } from '@/api/role'
-import { mapGetters } from 'vuex'
 import ElRadioGroup from 'element-ui/packages/radio/src/radio-group'
 import ElOption from 'element-ui/packages/select/src/option'
 
@@ -228,7 +227,7 @@ export default {
           {
             required: true,
             message: '请选择角色',
-            trigger: 'blur'
+            trigger: 'change'
           }
         ],
         phone: [
@@ -264,9 +263,6 @@ export default {
       tableKey: 0
     }
   },
-  computed: {
-    ...mapGetters(['permissions'])
-  },
   filters: {
     statusFilter (status) {
       const statusMap = {
@@ -279,17 +275,14 @@ export default {
   },
   created () {
     this.getList()
-    this.sys_user_add = this.permissions['sys_user_add']
-    this.sys_user_upd = this.permissions['sys_user_upd']
-    this.sys_user_del = this.permissions['sys_user_del']
   },
   methods: {
     getList () {
       this.listLoading = true
-      this.listQuery.isAsc = false
       fetchList(this.listQuery).then(response => {
         this.list = response.data.records
         this.total = response.data.total
+      }).finally(() => {
         this.listLoading = false
       })
     },
@@ -333,6 +326,7 @@ export default {
         for (var i = 0; i < row.roleList.length; i++) {
           this.role[i] = row.roleList[i].roleId
         }
+        this.form.role = this.role
         deptRoleList(response.data.deptId).then(response => {
           this.rolesOptions = response.data
         })
@@ -424,6 +418,9 @@ export default {
         deptId: '',
         phone: ''
       }
+    },
+    onRoleChange () {
+      this.form.role = this.role
     }
   }
 }
