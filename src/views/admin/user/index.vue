@@ -68,7 +68,7 @@
 
       <el-table-column align="center" label="标签">
         <template slot-scope="scope">
-          <el-tag type="success">{{scope.row.label}}</el-tag>
+          <el-tag v-if="scope.row.label" type="success">{{scope.row.label}}</el-tag>
         </template>
       </el-table-column>
 
@@ -121,15 +121,6 @@
           <input type="hidden" v-model="form.deptId" />
         </el-form-item>
 
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="role" placeholder="请选择" multiple @change="onRoleChange()">
-            <el-option v-for="item in rolesOptions" :key="item.roleId" :label="item.roleDesc" :value="item.roleId" :disabled="isDisabled[item.delFlag]">
-              <span style="float: left">{{ item.roleDesc }}</span>
-              <span style="float: right; color: #8492a6; font-size: 13px">{{ item.roleCode }}</span>
-            </el-option>
-          </el-select>
-        </el-form-item>
-
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="form.phone" placeholder="验证码登录使用"></el-input>
         </el-form-item>
@@ -155,7 +146,7 @@
 
 <script>
 import { fetchList, getObj, addObj, putObj, delObj } from '@/api/user'
-import { deptRoleList, fetchDeptTree } from '@/api/role'
+import { fetchDeptTree } from '@/api/role'
 import ElRadioGroup from 'element-ui/packages/radio/src/radio-group'
 import ElOption from 'element-ui/packages/select/src/option'
 
@@ -180,7 +171,6 @@ export default {
         page: 1,
         limit: 10
       },
-      role: [],
       form: {
         username: undefined,
         newpassword1: undefined,
@@ -223,13 +213,6 @@ export default {
             trigger: 'blur'
           }
         ],
-        role: [
-          {
-            required: true,
-            message: '请选择角色',
-            trigger: 'change'
-          }
-        ],
         phone: [
           {
             required: true,
@@ -245,7 +228,6 @@ export default {
         ]
       },
       statusOptions: ['0', '1'],
-      rolesOptions: [],
       dialogFormVisible: false,
       dialogDeptVisible: false,
       userAdd: false,
@@ -290,11 +272,6 @@ export default {
       this.dialogDeptVisible = false
       this.form.deptId = data.id
       this.form.deptName = data.name
-      this.form.role = []
-      this.role = []
-      deptRoleList(data.id).then(response => {
-        this.rolesOptions = response.data
-      })
     },
     handleDept () {
       fetchDeptTree().then(response => {
@@ -316,7 +293,6 @@ export default {
     },
     handleCreate () {
       this.resetTemp()
-      this.role = []
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
     },
@@ -325,19 +301,10 @@ export default {
         this.form = response.data
         this.dialogFormVisible = true
         this.dialogStatus = 'update'
-        this.role = []
-        for (var i = 0; i < row.roleList.length; i++) {
-          this.role[i] = row.roleList[i].roleId
-        }
-        this.form.role = this.role
-        deptRoleList(response.data.deptId).then(response => {
-          this.rolesOptions = response.data
-        })
       })
     },
     create (formName) {
       const set = this.$refs
-      this.form.role = this.role
       set[formName].validate(valid => {
         if (valid) {
           addObj(this.form).then(() => {
@@ -361,7 +328,6 @@ export default {
     },
     update (formName) {
       const set = this.$refs
-      this.form.role = this.role
       set[formName].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
@@ -401,7 +367,7 @@ export default {
               duration: 2000
             })
           })
-          .cache(() => {
+          .catch(() => {
             this.$notify({
               title: '失败',
               message: '删除失败',
@@ -416,14 +382,10 @@ export default {
         id: undefined,
         username: '',
         password: '',
-        role: [],
         delFlag: '',
         deptId: '',
         phone: ''
       }
-    },
-    onRoleChange () {
-      this.form.role = this.role
     }
   }
 }
