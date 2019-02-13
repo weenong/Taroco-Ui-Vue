@@ -29,8 +29,6 @@ router.beforeEach((to, from, next) => {
       store.commit('d2admin/user/SET_MENU', res.data)
       // 多页面控制: 处理路由 得到每一级的路由设置
       store.commit('d2admin/page/init', frameInRoutes)
-      // 设置侧边栏菜单
-      store.commit('d2admin/menu/asideSet', res.data)
       // 设置顶栏菜单
       store.commit('d2admin/menu/headerSet', res.data)
       next({name: 'index'})

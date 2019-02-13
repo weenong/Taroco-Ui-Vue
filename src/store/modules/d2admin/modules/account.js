@@ -37,8 +37,6 @@ export default {
                 commit('d2admin/user/SET_MENU', res.data, { root: true })
                 // 多页面控制: 处理路由 得到每一级的路由设置
                 commit('d2admin/page/init', frameInRoutes, { root: true })
-                // 设置侧边栏菜单
-                commit('d2admin/menu/asideSet', res.data, { root: true })
                 // 设置顶栏菜单
                 commit('d2admin/menu/headerSet', res.data, { root: true })
                 // 跳转路由
