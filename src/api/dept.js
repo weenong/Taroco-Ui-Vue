@@ -1,5 +1,13 @@
 import request from '@/plugin/axios'
 
+export function listAll (query) {
+  return request({
+    url: '/admin/dept/list',
+    method: 'get',
+    params: query
+  })
+}
+
 export function fetchTree (query) {
   return request({
     url: '/admin/dept/tree',
