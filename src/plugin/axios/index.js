@@ -50,6 +50,7 @@ service.interceptors.response.use(data => {
           break
         case 401:
           errMsg = '当前操作没有权限'
+          console.log(error.response.data)
           if (error.response.data && error.response.data.error === 'invalid_token') {
             errMsg = '无效的Token'
             util.cookies.remove('token')

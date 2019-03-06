@@ -16,8 +16,15 @@ import { frameInRoutes } from '@/router/routes'
 // 全局filter
 import * as filters from './filters'
 
+// import the component
+import Treeselect from '@riophae/vue-treeselect'
+// import the styles
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+
 // 核心插件
 Vue.use(d2Admin)
+
+Vue.use(Treeselect)
 
 // 全局filter
 Object.keys(filters).forEach(key => {
@@ -28,6 +35,8 @@ new Vue({
   router,
   store,
   i18n,
+  components: {
+  },
   render: h => h(App),
   created () {
     // 刷新页面时,从持久化数据加载数据到vuex

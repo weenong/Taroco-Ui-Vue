@@ -106,48 +106,65 @@
       </el-tree>
     </el-dialog>
     <!-- 新增用户弹框 -->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="400px">
-      <el-form :model="form" :rules="rules" ref="form" label-width="100px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" placeholder="请输用户名"></el-input>
-        </el-form-item>
-
-        <el-form-item v-if="dialogStatus == 'create'" label="密码" placeholder="请输入密码" prop="newpassword1">
-          <el-input type="password" v-model="form.newpassword1"></el-input>
-        </el-form-item>
-
-        <el-form-item label="所属部门" prop="deptName">
-          <el-input v-model="form.deptName" placeholder="选择部门" @focus="handleDept()" readonly></el-input>
-          <input type="hidden" v-model="form.deptId" />
-        </el-form-item>
-
-        <el-form-item label="角色" prop="role">
-          <el-select  v-model="role" placeholder="请选择" multiple>
-            <el-option v-for="item in rolesOptions" :key="item.roleId" :label="item.roleDesc" :value="item.roleId" :disabled="isDisabled[item.delFlag]">
-              <span style="float: left">{{ item.roleDesc }}</span>
-              <span style="float: right; color: #8492a6; font-size: 13px">{{ item.roleCode }}</span>
-            </el-option>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="form.phone" placeholder="验证码登录使用"></el-input>
-        </el-form-item>
-
-        <el-form-item label="标签" prop="label">
-          <el-input v-model="form.label" placeholder="多个标签 ',' 隔开"></el-input>
-        </el-form-item>
-
-        <el-form-item label="状态" v-if="dialogStatus == 'update' && sys_user_del " prop="delFlag">
-          <el-select v-model="form.delFlag" placeholder="请选择">
-            <el-option v-for="item in statusOptions" :key="item" :label="item | statusFilter" :value="item"> </el-option>
-          </el-select>
-        </el-form-item>
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="600px">
+      <el-form :model="form" :rules="rules" ref="form" label-width="80px" size="mini">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="用户名" prop="username">
+              <el-input v-model="form.username" placeholder="请输用户名"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="密码" placeholder="请输入密码" prop="newpassword1">
+              <el-input :disabled="dialogStatus == 'update'" type="password" v-model="form.newpassword1"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="所属部门" prop="deptName">
+              <el-input v-model="form.deptName" placeholder="选择部门" @focus="handleDept()" readonly></el-input>
+              <input type="hidden" v-model="form.deptId" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="角色" prop="roleList">
+              <el-select v-model="form.roleList" value-key="roleId" placeholder="请选择" multiple collapse-tags style="width:100%;">
+                <el-option v-for="item in rolesOptions" :key="item.roleId" :label="item.roleDesc" :value="item" :disabled="isDisabled[item.delFlag]">
+                  <!-- <span style="float: left">{{ item.roleDesc }}</span> -->
+                  <!-- <span style="float: right; color: #8492a6; font-size: 13px">{{ item.roleCode }}</span> -->
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="手机号" prop="phone">
+              <el-input v-model="form.phone" placeholder="验证码登录使用"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="状态" prop="delFlag">
+              <el-select v-model="form.delFlag" placeholder="请选择" :disabled="dialogStatus == 'create' || !sys_user_del">
+                <el-option v-for="item in statusOptions" :key="item" :label="item | statusFilter" :value="item"> </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-form-item label="标签" prop="label">
+            <el-input v-model="form.label" placeholder="多个标签 ',' 隔开"></el-input>
+          </el-form-item>
+        </el-row>
+        <el-row>
+          <Treeselect v-model="value" :multiple="true" :options="options" />
+        </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="cancel('form')" icon="el-icon-close">取 消</el-button>
-        <el-button v-if="dialogStatus=='create'" type="primary" @click="create('form')" icon="el-icon-check">确 定</el-button>
-        <el-button v-else type="primary" @click="update('form')" icon="el-icon-check">修 改</el-button>
+        <el-button @click="cancel('form')" icon="el-icon-close" size="mini">取 消</el-button>
+        <el-button v-if="dialogStatus=='create'" type="primary" @click="create('form')" icon="el-icon-check" size="mini">确 定</el-button>
+        <el-button v-else type="primary" @click="update('form')" icon="el-icon-check" size="mini">修 改</el-button>
       </div>
     </el-dialog>
   </d2-container>
@@ -159,15 +176,36 @@ import { deptRoleList, fetchDeptTree } from '@/api/role'
 import { mapGetters } from 'vuex'
 import ElRadioGroup from 'element-ui/packages/radio/src/radio-group'
 import ElOption from 'element-ui/packages/select/src/option'
-
+import Treeselect from '@riophae/vue-treeselect'
 export default {
   components: {
     ElOption,
-    ElRadioGroup
+    ElRadioGroup,
+    Treeselect
   },
   name: 'table_user',
   data () {
     return {
+      value: null,
+      // define options
+      options: [ {
+        id: 'a',
+        label: 'a',
+        children: [ {
+          id: 'aa',
+          label: 'aa'
+        }, {
+          id: 'ab',
+          label: 'ab'
+        } ]
+      }, {
+        id: 'b',
+        label: 'b'
+      }, {
+        id: 'c',
+        label: 'c'
+      } ],
+      roletest: [],
       treeDeptData: [],
       checkedKeys: [],
       defaultProps: {
@@ -181,14 +219,14 @@ export default {
         page: 1,
         limit: 10
       },
-      role: [],
       form: {
         username: undefined,
         newpassword1: undefined,
         delFlag: undefined,
         deptId: undefined,
         phone: undefined,
-        label: undefined
+        label: undefined,
+        roleList: []
       },
       rules: {
         username: [
@@ -206,11 +244,6 @@ export default {
         ],
         newpassword1: [
           {
-            required: true,
-            message: '请输入密码',
-            trigger: 'blur'
-          },
-          {
             min: 6,
             max: 20,
             message: '长度在 6 到 20 个字符',
@@ -224,11 +257,12 @@ export default {
             trigger: 'blur'
           }
         ],
-        role: [
+        roleList: [
           {
+            type: 'array',
             required: true,
             message: '请选择角色',
-            trigger: 'blur'
+            trigger: 'change'
           }
         ],
         phone: [
@@ -329,10 +363,11 @@ export default {
         this.form = response.data
         this.dialogFormVisible = true
         this.dialogStatus = 'update'
-        this.role = []
         for (var i = 0; i < row.roleList.length; i++) {
-          this.role[i] = row.roleList[i].roleId
+          // this.form.roles[i] = row.roleList[i].roleId
+          // Vue.set(this.form.roles, i, row.roleList[i].roleId)
         }
+        console.log(this.form.roles)
         deptRoleList(response.data.deptId).then(response => {
           this.rolesOptions = response.data
         })
@@ -364,7 +399,8 @@ export default {
     },
     update (formName) {
       const set = this.$refs
-      this.form.role = this.role
+      // this.form.role = this.role
+      console.log(this.form)
       set[formName].validate(valid => {
         if (valid) {
           this.dialogFormVisible = false
@@ -419,7 +455,7 @@ export default {
         id: undefined,
         username: '',
         password: '',
-        role: [],
+        roleList: [],
         delFlag: '',
         deptId: '',
         phone: ''
