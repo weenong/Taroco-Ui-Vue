@@ -146,7 +146,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="状态" prop="delFlag">
-              <el-select v-model="form.delFlag" placeholder="请选择" :disabled="dialogStatus == 'create' || !sys_user_del">
+              <el-select v-model="form.delFlag" placeholder="请选择" :disabled="!sys_user_del" style="width:100%;">
                 <el-option v-for="item in statusOptions" :key="item" :label="item | statusFilter" :value="item"> </el-option>
               </el-select>
             </el-form-item>
@@ -173,7 +173,7 @@
 <script>
 import { fetchList, getObj, addObj, putObj, delObj } from '@/api/user'
 import { deptRoleList, fetchDeptTree } from '@/api/role'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import ElRadioGroup from 'element-ui/packages/radio/src/radio-group'
 import ElOption from 'element-ui/packages/select/src/option'
 import Treeselect from '@riophae/vue-treeselect'
@@ -299,7 +299,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['permissions'])
+    ...mapGetters(['permissions']),
+    ...mapState('d2admin/user', ['info'])
   },
   filters: {
     statusFilter (status) {
@@ -357,17 +358,15 @@ export default {
       this.resetTemp()
       this.dialogStatus = 'create'
       this.dialogFormVisible = true
+      // deptRoleList(this.info.deptId).then(response => {
+      //   this.rolesOptions = response.data
+      // })
     },
     handleUpdate (row) {
       getObj(row.userId).then(response => {
         this.form = response.data
         this.dialogFormVisible = true
         this.dialogStatus = 'update'
-        for (var i = 0; i < row.roleList.length; i++) {
-          // this.form.roles[i] = row.roleList[i].roleId
-          // Vue.set(this.form.roles, i, row.roleList[i].roleId)
-        }
-        console.log(this.form.roles)
         deptRoleList(response.data.deptId).then(response => {
           this.rolesOptions = response.data
         })

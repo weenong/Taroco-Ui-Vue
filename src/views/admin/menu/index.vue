@@ -30,7 +30,7 @@
             <el-input v-model="form.parentId" :disabled="true" placeholder="请输入父级节点"></el-input>
           </el-form-item>
           <el-form-item label="节点ID" prop="menuId">
-            <el-input v-model="form.menuId" :disabled="formEdit" placeholder="请输入节点ID"></el-input>
+            <el-input v-model="form.menuId" :disabled="true" placeholder=""></el-input>
           </el-form-item>
           <el-form-item label="标题" prop="name">
             <el-input v-model="form.name" :disabled="formEdit"  placeholder="请输入标题"></el-input>
